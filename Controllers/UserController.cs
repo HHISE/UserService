@@ -15,33 +15,58 @@ public class UserController : ControllerBase
     
     private static readonly User[] Users =
     [
-        new User
-        {
-            Id = Guid.NewGuid(),
-            Name = "Ali",
-            EmailAddress = "ali@email.com"
-        },
+      new User
+{
+    Id = Guid.NewGuid(),
+    Name = "Helle",
+    Address1 = "Aarhusvej 10",
+    PostalCode = 8000,
+    City = "Aarhus",
+    EmailAddress = "helle@email.com"
+},
 
-        new User
-        {
-            Id = Guid.NewGuid(),
-            Name = "Sara",
-            EmailAddress = "sara@email.com"
-        },
-
-        new User
-        {
-            Id = Guid.NewGuid(),
-            Name = "Omar",
-            EmailAddress = "omar@email.com"
-        }
+new User
+{
+    Id = Guid.NewGuid(),
+    Name = "Sara",
+    Address1 = "Viborgvej 1",
+    PostalCode = 8800,
+    City = "Viborg",
+    EmailAddress = "sara@email.com"
+},
+     
+new User
+{
+    Id = Guid.NewGuid(),
+    Name = "Julie",
+    Address1 = "Hobrovej 8",
+    PostalCode = 8000,
+    City = "Aarhus",
+    EmailAddress = "ali@email.com"
+}
     ];
   
 
-[HttpGet("{userId}", Name = "GetUserById")]
-public User Get(Guid userId)
+// Hent alle brugere
+[HttpGet]
+public IEnumerable<User> GetAll()
 {
-    return Users.First(user => user.Id == userId);
+    return Users;
+}
+
+// Hent én bestemt bruger
+[HttpGet("{userId}", Name = "GetUserById")]
+public User? Get(Guid userId)
+{
+    foreach (User user in Users)
+    {
+        if (user.Id == userId)
+        {
+            return user;
+        }
+    }
+
+    return null;
 }
 
 }
