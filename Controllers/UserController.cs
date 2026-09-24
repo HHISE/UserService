@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using UserService.Repositories;
 
 namespace UserService.Controllers;
 
@@ -8,64 +9,83 @@ namespace UserService.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
+    private readonly IUserRepository _userRepository;
 
-    public UserController(ILogger<UserController> logger)
+    public UserController(
+        ILogger<UserController> logger,
+        IUserRepository userRepository)
     {
         _logger = logger;
+        _userRepository = userRepository;
     }
 
-    private static readonly User[] Users =
-    [
-        new User
-        {
-            Id = 1,
-            Name = "Helle",
-            Address1 = "Aarhusvej 10",
-            PostalCode = 8000,
-            City = "Aarhus",
-            EmailAddress = "helle@email.com"
-        },
-
-        new User
-        {
-            Id = 2,
-            Name = "Sara",
-            Address1 = "Viborgvej 1",
-            PostalCode = 8800,
-            City = "Viborg",
-            EmailAddress = "sara@email.com"
-        },
-
-        new User
-        {
-            Id = 3,
-            Name = "Julie",
-            Address1 = "Hobrovej 8",
-            PostalCode = 8000,
-            City = "Aarhus",
-            EmailAddress = "ali@email.com"
-        }
-    ];
-
-    // Hent alle brugere
+    // GET: Hent alle brugere
     [HttpGet]
-    public IEnumerable<User> GetAll()
+    public async Task<ActionResult<List<User>>> GetAll()
     {
-        return Users;
+        var users = await _userRepository.GetAllAsync();
+
+        return Ok(users);
     }
 
-    // Hent én bestemt bruger
+    // GET: Hent én bestemt bruger
     [HttpGet("{userId}", Name = "GetUserById")]
-    public User? Get(int userId)
+    public async Task<ActionResult<User>> Get(int userId)
     {
-        foreach (User user in Users)
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null)
         {
-            if (user.Id == userId)
-            {
-                return user;
-            }
+            return NotFound();
         }
 
-        return null;
+        return Ok(user);
+    }
+
+    // POST: Opret en ny bruger
+    [HttpPost]
+    public async Task<ActionResult<User>> Create(User user)
+    {
+        await _userRepository.CreateAsync(user);
+
+        return CreatedAtRoute(
+            "GetUserById",
+            new { userId = user.Id },
+            user
+        );
+    }
+
+    // PUT: Opdater en bruger
+    [HttpPut("{userId}")]
+    public async Task<IActionResult> Update(int userId, User user)
+    {
+        var existingUser = await _userRepository.GetByIdAsync(userId);
+
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        user.Id = userId;
+
+        await _userRepository.UpdateAsync(userId, user);
+
+        return NoContent();
+    }
+
+    // DELETE: Slet en bruger
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> Delete(int userId)
+    {
+        var existingUser = await _userRepository.GetByIdAsync(userId);
+
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        await _userRepository.DeleteAsync(userId);
+
+        return NoContent();
     }
 }
