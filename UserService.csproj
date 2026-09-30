@@ -25,4 +25,8 @@
         <PackageReference Include="Scalar.AspNetCore" Version="2.17.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".github\workflows\docker-image.yml" />
+    </ItemGroup>
+
 </Project>
