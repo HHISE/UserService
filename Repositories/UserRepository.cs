@@ -9,11 +9,12 @@ public class UserRepository : IUserRepository
 
     public UserRepository(IConfiguration configuration)
     {
-        var connectionString = configuration["MONGODB_CONNECTION_STRING"];
+        var connectionString = configuration["MongoDb:ConnectionString"];
+        string databaseName = configuration["MongoDb:DatabaseName"];
 
         var client = new MongoClient(connectionString);
-        var database = client.GetDatabase("UserDatabase");
-
+        var database = client.GetDatabase(databaseName);
+        
         _users = database.GetCollection<User>("Users");
     }
 
