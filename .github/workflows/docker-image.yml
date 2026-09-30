@@ -21,6 +21,7 @@ jobs:
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       IMAGE_NAME: user-service
       IMAGE_VERSION: 1.0.1
+      
 
     steps:
       - uses: actions/checkout@v4
