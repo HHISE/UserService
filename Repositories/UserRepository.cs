@@ -6,12 +6,15 @@ using Models;
 public class UserRepository : IUserRepository
 {
     private readonly IMongoCollection<User> _users;
-
-    public UserRepository(IConfiguration configuration)
+    private readonly ILogger<UserRepository> _logger;
+    
+    public UserRepository(ILogger<UserRepository> logger, IConfiguration configuration)
     {
+        _logger = logger;
         var connectionString = configuration["MongoDb:ConnectionString"];
         string databaseName = configuration["MongoDb:DatabaseName"];
-
+        
+        _logger.LogInformation($"Connecting to {connectionString} database {databaseName}");
         var client = new MongoClient(connectionString);
         var database = client.GetDatabase(databaseName);
         

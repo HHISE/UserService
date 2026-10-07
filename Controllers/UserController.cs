@@ -12,12 +12,18 @@ public class UserController : ControllerBase
     private readonly ILogger<UserController> _logger;
     private readonly IUserRepository _userRepository;
 
+    
     public UserController(
         ILogger<UserController> logger,
         IUserRepository userRepository)
     {
         _logger = logger;
         _userRepository = userRepository;
+        
+        var hostName = System.Net.Dns.GetHostName();
+        var ips = System.Net.Dns.GetHostAddresses(hostName);
+        var _ipaddr = ips.First().MapToIPv4().ToString();
+        _logger.LogInformation(1, $"XYZ Service responding from {_ipaddr}");
     }
     
     [HttpGet("version")]
@@ -46,9 +52,10 @@ public class UserController : ControllerBase
     public async Task<ActionResult<List<User>>> GetAll()
     {
         var users = await _userRepository.GetAllAsync();
-
+        
         return Ok(users);
     }
+    
 
     // GET: Hent én bestemt bruger
     [HttpGet("{userId}", Name = "GetUserById")]

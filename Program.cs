@@ -1,30 +1,55 @@
 using Scalar.AspNetCore;
 using UserService.Repositories;
-var builder = WebApplication.CreateBuilder(args);
+using NLog;
+using NLog.Web;
+
+var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings()
+    .GetCurrentClassLogger();
+logger.Debug("start min service");
+
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+
+    builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+    builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-var app = builder.Build();
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
+    var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{ 
-    //1. Lav OpenAPI endepunkt (defaults to /openapi/v1.json)
-    app.MapOpenApi();
+    if (app.Environment.IsDevelopment())
+    {
+        //1. Lav OpenAPI endepunkt (defaults to /openapi/v1.json)
+        app.MapOpenApi();
 //2. Start Scalar webUI (default: /scalar/v1)
-    app.MapScalarApiReference();
+        app.MapScalarApiReference();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
+    
 }
 
-app.UseHttpsRedirection();
+catch (Exception ex)
+{
+    logger.Error(ex, "Stopped program because of exception");
+    throw;
+}
 
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+finally
+{
+    NLog.LogManager.Shutdown();
+}
