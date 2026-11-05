@@ -48,8 +48,8 @@ public class UserController : ControllerBase
         return properties;
     }
 
-    [Authorize]
-    [HttpGet]
+    [Authorize(Roles = "User")]
+    [HttpGet("GetAll")]
     public async Task<ActionResult<List<User>>> GetAll()
     {
         var users = await _userRepository.GetAllAsync();
@@ -58,7 +58,7 @@ public class UserController : ControllerBase
     }
     
 
-    [Authorize]
+    [Authorize(Roles = "User")]
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> Get(int id)
     {
