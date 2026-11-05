@@ -3,6 +3,7 @@ using Models;
 using UserService.Repositories;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using UserService.RabbitMQ;
 
 namespace UserService.Controllers;
 
@@ -12,14 +13,17 @@ public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
     private readonly IUserRepository _userRepository;
+    private readonly RabbitMQService _rabbitMqService;
 
     
     public UserController(
         ILogger<UserController> logger,
+        RabbitMQService rabbitMqService,
         IUserRepository userRepository)
     {
         _logger = logger;
         _userRepository = userRepository;
+        _rabbitMqService = rabbitMqService;
         
         var hostName = System.Net.Dns.GetHostName();
         var ips = System.Net.Dns.GetHostAddresses(hostName);
@@ -100,7 +104,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpDelete("{userId}")]
     public async Task<IActionResult> Delete(int userId)
     {
@@ -111,7 +115,15 @@ public class UserController : ControllerBase
             return NotFound();
         }
 
-        await _userRepository.DeleteAsync(userId);
+        bool deleted = await _userRepository.DeleteAsync(userId);
+
+        if (!deleted)
+        {
+            return StatusCode(500);
+        }
+        
+        // Send UserDeleted event via RabbitMQ
+        await _rabbitMqService.PublishUserDeletedAsync(userId);
 
         return NoContent();
     }

@@ -5,6 +5,8 @@ using NLog;
 using NLog.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using UserService.RabbitMQ;
+using UserService.Services;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings()
     .GetCurrentClassLogger();
@@ -44,7 +46,16 @@ try
 
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
+    
+    builder.Services.AddSingleton<RabbitMQConnection>();
+    builder.Services.AddSingleton<RabbitMQService>();
+    
     var app = builder.Build();
+    
+    // Initialize RabbitMQ
+    var rabbitMQService = app.Services.GetRequiredService<RabbitMQService>();
+
+    await rabbitMQService.InitializeAsync();
 
 // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

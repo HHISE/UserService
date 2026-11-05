@@ -46,8 +46,8 @@ public class UserRepository : IUserRepository
         );
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        await _users.DeleteOneAsync(user => user.Id == id);
+        return (await _users.DeleteOneAsync(user => user.Id == id)).DeletedCount == 1;
     }
 }
