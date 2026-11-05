@@ -1,7 +1,10 @@
+using System.Text;
 using Scalar.AspNetCore;
 using UserService.Repositories;
 using NLog;
 using NLog.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings()
     .GetCurrentClassLogger();
@@ -10,6 +13,25 @@ logger.Debug("start min service");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    
+    string mySecret = builder.Configuration["Secret"] ?? "none";
+    string myIssuer = builder.Configuration["Issuer"] ?? "none";
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = myIssuer,
+                ValidAudience = "http://localhost",
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(mySecret))
+            };
+        });
 
 // Add services to the container.
 
@@ -35,6 +57,7 @@ try
 
     app.UseHttpsRedirection();
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();

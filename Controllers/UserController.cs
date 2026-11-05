@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using UserService.Repositories;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UserService.Controllers;
 
@@ -47,31 +48,28 @@ public class UserController : ControllerBase
         return properties;
     }
 
-    // GET: Hent alle brugere
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<List<User>>> GetAll()
     {
         var users = await _userRepository.GetAllAsync();
         
-        return Ok(users);
+        return Ok(new { users, message = "You're authorized" });
     }
     
 
-    // GET: Hent én bestemt bruger
-    [HttpGet("{userId}", Name = "GetUserById")]
-    public async Task<ActionResult<User>> Get(int userId)
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<User>> Get(int id)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await _userRepository.GetByIdAsync(id);
 
-        if (user == null)
-        {
+        if (user is null)
             return NotFound();
-        }
 
-        return Ok(user);
+        return Ok( user);
     }
-
-    // POST: Opret en ny bruger
+    
     [HttpPost]
     public async Task<ActionResult<User>> Create(User user)
     {
@@ -84,7 +82,7 @@ public class UserController : ControllerBase
         );
     }
 
-    // PUT: Opdater en bruger
+    [Authorize]
     [HttpPut("{userId}")]
     public async Task<IActionResult> Update(int userId, User user)
     {
@@ -102,7 +100,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: Slet en bruger
+    [Authorize]
     [HttpDelete("{userId}")]
     public async Task<IActionResult> Delete(int userId)
     {
