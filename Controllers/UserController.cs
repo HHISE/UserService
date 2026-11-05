@@ -3,6 +3,7 @@ using Models;
 using UserService.Repositories;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using UserService.RabbitMQ;
 
 namespace UserService.Controllers;
@@ -52,8 +53,8 @@ public class UserController : ControllerBase
         return properties;
     }
 
-    [Authorize]
-    [HttpGet]
+    [Authorize(Roles = "User")]
+    [HttpGet("GetAll")]
     public async Task<ActionResult<List<User>>> GetAll()
     {
         var users = await _userRepository.GetAllAsync();
@@ -62,7 +63,7 @@ public class UserController : ControllerBase
     }
     
 
-    [Authorize]
+    [Authorize(Roles = "User")]
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> Get(int id)
     {
@@ -74,16 +75,17 @@ public class UserController : ControllerBase
         return Ok( user);
     }
     
-    [HttpPost]
+    [HttpPost("Create")]
     public async Task<ActionResult<User>> Create(User user)
     {
+        var hasher = new PasswordHasher<User>();
+        user.PasswordHash = hasher.HashPassword(user, user.Password);
+
+        user.Password = string.Empty;
+
         await _userRepository.CreateAsync(user);
 
-        return CreatedAtRoute(
-            "GetUserById",
-            new { userId = user.Id },
-            user
-        );
+        return Ok(user);
     }
 
     [Authorize]
@@ -104,7 +106,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    //[Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{userId}")]
     public async Task<IActionResult> Delete(int userId)
     {
@@ -126,5 +128,16 @@ public class UserController : ControllerBase
         await _rabbitMqService.PublishUserDeletedAsync(userId);
 
         return NoContent();
+    }
+    
+    [HttpGet("username/{username}")]
+    public async Task<ActionResult<User>> GetByUsername(string username)
+    {
+        var user = await _userRepository.GetByUsernameAsync(username);
+
+        if (user is null)
+            return NotFound();
+
+        return Ok(user);
     }
 }
