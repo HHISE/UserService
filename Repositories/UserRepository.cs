@@ -12,9 +12,11 @@ public class UserRepository : IUserRepository
     {
         _logger = logger;
         var connectionString = configuration["MongoDb:ConnectionString"];
-        string databaseName = configuration["MongoDb:DatabaseName"];
+        var databaseName = configuration["MongoDb:DatabaseName"];
         
         _logger.LogInformation($"Connecting to {connectionString} database {databaseName}");
+        
+
         var client = new MongoClient(connectionString);
         var database = client.GetDatabase(databaseName);
         
