@@ -3,6 +3,7 @@ using Models;
 using UserService.Repositories;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace UserService.Controllers;
 
@@ -70,16 +71,17 @@ public class UserController : ControllerBase
         return Ok( user);
     }
     
-    [HttpPost]
+    [HttpPost("Create")]
     public async Task<ActionResult<User>> Create(User user)
     {
+        var hasher = new PasswordHasher<User>();
+        user.PasswordHash = hasher.HashPassword(user, user.Password);
+
+        user.Password = string.Empty;
+
         await _userRepository.CreateAsync(user);
 
-        return CreatedAtRoute(
-            "GetUserById",
-            new { userId = user.Id },
-            user
-        );
+        return Ok(user);
     }
 
     [Authorize]
@@ -100,7 +102,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{userId}")]
     public async Task<IActionResult> Delete(int userId)
     {
@@ -114,5 +116,16 @@ public class UserController : ControllerBase
         await _userRepository.DeleteAsync(userId);
 
         return NoContent();
+    }
+    
+    [HttpGet("username/{username}")]
+    public async Task<ActionResult<User>> GetByUsername(string username)
+    {
+        var user = await _userRepository.GetByUsernameAsync(username);
+
+        if (user is null)
+            return NotFound();
+
+        return Ok(user);
     }
 }

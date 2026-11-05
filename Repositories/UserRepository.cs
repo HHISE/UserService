@@ -50,4 +50,9 @@ public class UserRepository : IUserRepository
     {
         await _users.DeleteOneAsync(user => user.Id == id);
     }
+    
+    public async Task<User?> GetByUsernameAsync(string username)
+    {
+        return await _users.Find(user => user.Username == username).FirstOrDefaultAsync();
+    }
 }
