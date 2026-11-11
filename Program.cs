@@ -88,7 +88,7 @@ try
     
     //Added frontend page for user
     app.UseStaticFiles();
-    app.MapGet("/", () => Results.Redirect("/Users"));
+    app.MapGet("/", () => Results.Redirect("/User"));
     app.MapRazorPages();
     
     app.Run();

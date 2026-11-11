@@ -1,0 +1,60 @@
+@page "/user/create"
+@model UserService.Pages.CreateModel
+
+<h2>Opret ny bruger</h2>
+
+@if (TempData["Success"] != null)
+{
+    <p>@TempData["Success"]</p>
+}
+
+<form method="post">
+
+    <div asp-validation-summary="All"></div>
+
+    <div>
+        <label asp-for="NewUser.Name">Navn</label>
+        <input asp-for="NewUser.Name" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.Address">Adresse</label>
+        <input asp-for="NewUser.Address" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.City">By</label>
+        <input asp-for="NewUser.City" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.Email">Email</label>
+        <input asp-for="NewUser.Email" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.PhoneNumber">Telefonnummer</label>
+        <input asp-for="NewUser.PhoneNumber" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.Username">Brugernavn</label>
+        <input asp-for="NewUser.Username" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.Password">Adgangskode</label>
+        <input asp-for="NewUser.Password" type="password" />
+    </div>
+
+    <div>
+        <label asp-for="NewUser.Role">Rolle</label>
+        <select asp-for="NewUser.Role">
+            <option value="User">User</option>
+            <option value="Admin">Admin</option>
+        </select>
+    </div>
+
+    <button type="submit">Opret bruger</button>
+
+</form>
