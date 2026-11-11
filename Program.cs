@@ -5,6 +5,7 @@ using NLog;
 using NLog.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using UserService.RabbitMQ;
 using UserService.Services;
 
@@ -15,6 +16,16 @@ logger.Debug("start min service");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    
+    //Nginx
+    var gatewayUrl = builder.Configuration["GatewayUrl"] ??
+                     "http://<vi mangler addressen>:4000";
+    builder.Services.AddHttpClient("HaavGateway", client =>
+    {
+        client.BaseAddress = new Uri(gatewayUrl);
+        client.DefaultRequestHeaders.Add(
+            HeaderNames.Accept, "application/json");
+    });
     
     string mySecret = builder.Configuration["Secret"] ?? "none";
     string myIssuer = builder.Configuration["Issuer"] ?? "none";
@@ -37,7 +48,9 @@ try
 
 // Add services to the container.
 
-
+    //Micro frontends
+    builder.Services.AddRazorPages();
+    
     builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
@@ -72,7 +85,12 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
-
+    
+    //Added frontend page for user
+    app.UseStaticFiles();
+    app.MapGet("/", () => Results.Redirect("/Users"));
+    app.MapRazorPages();
+    
     app.Run();
     
 }
