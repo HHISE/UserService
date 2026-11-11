@@ -19,8 +19,8 @@ try
     
     //Nginx
     var gatewayUrl = builder.Configuration["GatewayUrl"] ??
-                     "http://<vi mangler addressen>:4000";
-    builder.Services.AddHttpClient("HaavGateway", client =>
+                     "http://localhost:4000";
+    builder.Services.AddHttpClient("haavGateway", client =>
     {
         client.BaseAddress = new Uri(gatewayUrl);
         client.DefaultRequestHeaders.Add(
