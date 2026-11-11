@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace UserService.Pages.Homepage;
+namespace UserService.Pages;
 
-public class Homepage : PageModel
+public class IndexModel : PageModel
 {
     public void OnGet()
     {
-        
     }
 }

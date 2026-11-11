@@ -1,19 +1,21 @@
-@page
-@model UserService.Pages.Homepage.Homepage
+@page 
+@model UserService.Pages.IndexModel
 
 @{
-    Layout = null;
+    ViewData["Title"] = "UserService";
 }
 
-<!DOCTYPE html>
+<div class="container mt-5 text-center">
+    <h1>Velkommen til UserService</h1>
+    <p>Her kan du administrere brugere.</p>
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
-    
+    <div class="mt-4">
+        <a href="/user/list" class="btn btn-primary btn-lg me-3">
+            Se alle brugere
+        </a>
+
+        <a href="/user/create" class="btn btn-success btn-lg">
+            Opret ny bruger
+        </a>
+    </div>
 </div>
-</body>
-</html>
